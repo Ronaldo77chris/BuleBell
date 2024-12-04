@@ -26,23 +26,20 @@ const TokenExpireDuration = time.Hour * 24 * 365
 
 // GenToken 生成access token 和 refresh token
 func GenToken(userID uint64) (aToken, rToken string, err error) {
-	// 创建一个我们自己的声明
 	c := MyClaims{
-		userID, // 自定义字段
+		userID,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(), // 过期时间
-			Issuer:    "bluebell",                                 // 签发人
+			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(),
+			Issuer:    "bluebell",
 		},
 	}
-	// 加密并获得完整的编码后的字符串token
 	aToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, c).SignedString(mySecret)
 
 	// refresh token 不需要存任何自定义数据
 	rToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Second * 30).Unix(), // 过期时间
-		Issuer:    "bluebell",                              // 签发人
+		ExpiresAt: time.Now().Add(time.Second * 30).Unix(),
+		Issuer:    "bluebell",
 	}).SignedString(mySecret)
-	// 使用指定的secret签名并获得完整的编码后的字符串token
 	return
 }
 
