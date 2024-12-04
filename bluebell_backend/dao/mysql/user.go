@@ -3,18 +3,18 @@ package mysql
 import (
 	"bluebell_backend/models"
 	"bluebell_backend/pkg/snowflake"
-	"crypto/md5"
 	"database/sql"
-	"encoding/hex"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const secret = "liwenzhou.com"
 
-func encryptPassword(data []byte) (result string) {
-	h := md5.New()
-	h.Write([]byte(secret))
-	h.Write(data)
-	return hex.EncodeToString(h.Sum(nil))
+func encryptPassword(password string) (result string, err error) {
+	h, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(h), nil
 }
 
 func Register(user *models.User) (err error) {
@@ -34,7 +34,7 @@ func Register(user *models.User) (err error) {
 		return ErrorGenIDFailed
 	}
 	// 生成加密密码
-	password := encryptPassword([]byte(user.Password))
+	password, err := encryptPassword(user.Password)
 	// 把用户插入数据库
 	sqlStr = "insert into user(user_id, username, password) values (?,?,?)"
 	_, err = db.Exec(sqlStr, userID, user.UserName, password)
@@ -47,14 +47,14 @@ func Login(user *models.User) (err error) {
 	err = db.Get(user, sqlStr, user.UserName)
 	if err != nil && err != sql.ErrNoRows {
 		// 查询数据库出错
-		return
+		return err
 	}
-	if err == sql.ErrNoRows {
-		// 用户不存在
-		return ErrorUserNotExit
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(originPassword))
+	if err != nil {
+		return ErrorUserExit
 	}
 	// 生成加密密码与查询到的密码比较
-	password := encryptPassword([]byte(originPassword))
+	password, err := encryptPassword(originPassword)
 	if user.Password != password {
 		return ErrorPasswordWrong
 	}

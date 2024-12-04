@@ -1,0 +1,6 @@
+projectKey=Chris
+serverUrl=http://127.0.0.1:9000
+serverVersion=10.7.0.96327
+dashboardUrl=http://127.0.0.1:9000/dashboard?id=Chris
+ceTaskId=8a8c345c-8f6c-4ed9-9181-f22d4e663f1f
+ceTaskUrl=http://127.0.0.1:9000/api/ce/task?id=8a8c345c-8f6c-4ed9-9181-f22d4e663f1f
